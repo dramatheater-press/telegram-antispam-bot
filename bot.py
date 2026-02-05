@@ -1,4 +1,4 @@
-import os
+п»їimport os
 import logging
 import asyncio
 from datetime import datetime
@@ -9,41 +9,41 @@ from dotenv import load_dotenv
 from database import SpamDB
 from spam_filter import SilentSpamFilter
 
-# Без вывода в чат — только в лог файл/консоль
+# Р‘РµР· РІС‹РІРѕРґР° РІ С‡Р°С‚ вЂ” С‚РѕР»СЊРєРѕ РІ Р»РѕРі С„Р°Р№Р»/РєРѕРЅСЃРѕР»СЊ
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(message)s',
     handlers=[
         logging.FileHandler('antispam.log'),
-        logging.StreamHandler()  # Только для сервера, не для чата!
+        logging.StreamHandler()  # РўРѕР»СЊРєРѕ РґР»СЏ СЃРµСЂРІРµСЂР°, РЅРµ РґР»СЏ С‡Р°С‚Р°!
     ]
 )
 logger = logging.getLogger(__name__)
 
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-ADMIN_IDS = list(map(int, os.getenv("ADMIN_IDS", "").split(",")))  # В .env: ADMIN_IDS=123456789,987654321
+ADMIN_IDS = list(map(int, os.getenv("ADMIN_IDS", "").split(",")))  # Р’ .env: ADMIN_IDS=123456789,987654321
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 db = SpamDB()
 filter_engine = SilentSpamFilter(db)
 
-# === ПРИВАТНЫЕ КОМАНДЫ ДЛЯ АДМИНИСТРАТОРА (только в ЛС с ботом) ===
+# === РџР РР’РђРўРќР«Р• РљРћРњРђРќР”Р« Р”Р›РЇ РђР”РњРРќРРЎРўР РђРўРћР Рђ (С‚РѕР»СЊРєРѕ РІ Р›РЎ СЃ Р±РѕС‚РѕРј) ===
 @dp.message(Command("start"))
 async def cmd_start(message: Message):
     if message.chat.type != "private":
-        return  # Игнорируем в группах
+        return  # РРіРЅРѕСЂРёСЂСѓРµРј РІ РіСЂСѓРїРїР°С…
     
     if message.from_user.id not in ADMIN_IDS:
-        return  # Только для админов
+        return  # РўРѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРѕРІ
     
     await message.answer(
-        "??? Антиспам-бот готов.\n\n"
-        "Команды (только в ЛС):\n"
-        "/add_spam — добавить пример спама (ответьте на сообщение)\n"
-        "/list_spam — список паттернов\n"
-        "/del_spam ID — удалить паттерн"
+        "??? РђРЅС‚РёСЃРїР°Рј-Р±РѕС‚ РіРѕС‚РѕРІ.\n\n"
+        "РљРѕРјР°РЅРґС‹ (С‚РѕР»СЊРєРѕ РІ Р›РЎ):\n"
+        "/add_spam вЂ” РґРѕР±Р°РІРёС‚СЊ РїСЂРёРјРµСЂ СЃРїР°РјР° (РѕС‚РІРµС‚СЊС‚Рµ РЅР° СЃРѕРѕР±С‰РµРЅРёРµ)\n"
+        "/list_spam вЂ” СЃРїРёСЃРѕРє РїР°С‚С‚РµСЂРЅРѕРІ\n"
+        "/del_spam ID вЂ” СѓРґР°Р»РёС‚СЊ РїР°С‚С‚РµСЂРЅ"
     )
 
 @dp.message(Command("add_spam"))
@@ -52,18 +52,18 @@ async def cmd_add_spam(message: Message):
         return
     
     if not message.reply_to_message:
-        await message.answer("?? Ответьте на сообщение со спамом командой /add_spam")
+        await message.answer("?? РћС‚РІРµС‚СЊС‚Рµ РЅР° СЃРѕРѕР±С‰РµРЅРёРµ СЃРѕ СЃРїР°РјРѕРј РєРѕРјР°РЅРґРѕР№ /add_spam")
         return
     
     spam_text = (message.reply_to_message.text or message.reply_to_message.caption or "")
     if not spam_text.strip():
-        await message.answer("?? Сообщение пустое или содержит только медиа")
+        await message.answer("?? РЎРѕРѕР±С‰РµРЅРёРµ РїСѓСЃС‚РѕРµ РёР»Рё СЃРѕРґРµСЂР¶РёС‚ С‚РѕР»СЊРєРѕ РјРµРґРёР°")
         return
     
     sample_id = db.add_sample(spam_text, pattern_type='substring', admin_id=message.from_user.id)
     filter_engine.reload_patterns()
     
-    await message.answer(f"? Паттерн добавлен (ID: {sample_id})\n\nПример:\n{spam_text[:100]}")
+    await message.answer(f"? РџР°С‚С‚РµСЂРЅ РґРѕР±Р°РІР»РµРЅ (ID: {sample_id})\n\nРџСЂРёРјРµСЂ:\n{spam_text[:100]}")
 
 @dp.message(Command("list_spam"))
 async def cmd_list_spam(message: Message):
@@ -72,57 +72,57 @@ async def cmd_list_spam(message: Message):
     
     samples = db.get_all_samples()
     if not samples:
-        await message.answer("?? Нет сохранённых паттернов")
+        await message.answer("?? РќРµС‚ СЃРѕС…СЂР°РЅС‘РЅРЅС‹С… РїР°С‚С‚РµСЂРЅРѕРІ")
         return
     
-    text = "Список паттернов:\n"
-    for i, (pattern, ptype) in enumerate(samples[:20], 1):  # Первые 20
+    text = "РЎРїРёСЃРѕРє РїР°С‚С‚РµСЂРЅРѕРІ:\n"
+    for i, (pattern, ptype) in enumerate(samples[:20], 1):  # РџРµСЂРІС‹Рµ 20
         preview = pattern[:50].replace('\n', ' ') + ("..." if len(pattern) > 50 else "")
         text += f"{i}. [{ptype}] {preview}\n"
     
     await message.answer(text)
 
-# === ОСНОВНАЯ ЛОГИКА: МОЛЧАЛИВАЯ ОЧИСТКА ЧАТА ===
+# === РћРЎРќРћР’РќРђРЇ Р›РћР“РРљРђ: РњРћР›Р§РђР›РР’РђРЇ РћР§РРЎРўРљРђ Р§РђРўРђ ===
 @dp.message()
 async def handle_message(message: Message):
-    # Игнорируем служебные сообщения и сообщения от администраторов
+    # РРіРЅРѕСЂРёСЂСѓРµРј СЃР»СѓР¶РµР±РЅС‹Рµ СЃРѕРѕР±С‰РµРЅРёСЏ Рё СЃРѕРѕР±С‰РµРЅРёСЏ РѕС‚ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРІ
     if message.content_type not in ['text', 'caption']:
         return
     
-    # Проверяем, админ ли отправитель (чтобы не забанить админа по ошибке)
+    # РџСЂРѕРІРµСЂСЏРµРј, Р°РґРјРёРЅ Р»Рё РѕС‚РїСЂР°РІРёС‚РµР»СЊ (С‡С‚РѕР±С‹ РЅРµ Р·Р°Р±Р°РЅРёС‚СЊ Р°РґРјРёРЅР° РїРѕ РѕС€РёР±РєРµ)
     try:
         member = await bot.get_chat_member(message.chat.id, message.from_user.id)
         if member.status in ['creator', 'administrator']:
             return
     except Exception:
-        pass  # Если ошибка — продолжаем проверку
+        pass  # Р•СЃР»Рё РѕС€РёР±РєР° вЂ” РїСЂРѕРґРѕР»Р¶Р°РµРј РїСЂРѕРІРµСЂРєСѓ
     
     full_text = (message.text or message.caption or "")
     
     if filter_engine.is_spam(full_text):
         try:
-            # 1. Удаляем сообщение
+            # 1. РЈРґР°Р»СЏРµРј СЃРѕРѕР±С‰РµРЅРёРµ
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
             
-            # 2. Баним пользователя навсегда
+            # 2. Р‘Р°РЅРёРј РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РЅР°РІСЃРµРіРґР°
             await bot.ban_chat_member(
                 chat_id=message.chat.id,
                 user_id=message.from_user.id,
-                until_date=None  # Навсегда
+                until_date=None  # РќР°РІСЃРµРіРґР°
             )
             
-            # 3. Логируем действие (только в файл, НЕ в чат!)
+            # 3. Р›РѕРіРёСЂСѓРµРј РґРµР№СЃС‚РІРёРµ (С‚РѕР»СЊРєРѕ РІ С„Р°Р№Р», РќР• РІ С‡Р°С‚!)
             logger.info(
-                f"Забанен @{message.from_user.username or message.from_user.id} | "
-                f"Чат: {message.chat.title or message.chat.id} | "
-                f"Текст: {full_text[:80]}"
+                f"Р—Р°Р±Р°РЅРµРЅ @{message.from_user.username or message.from_user.id} | "
+                f"Р§Р°С‚: {message.chat.title or message.chat.id} | "
+                f"РўРµРєСЃС‚: {full_text[:80]}"
             )
             
         except Exception as e:
-            logger.error(f"Ошибка при обработке спама: {e}")
+            logger.error(f"РћС€РёР±РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ СЃРїР°РјР°: {e}")
 
 async def main():
-    logger.info("??? Антиспам-бот запущен (режим полной тишины)")
+    logger.info("??? РђРЅС‚РёСЃРїР°Рј-Р±РѕС‚ Р·Р°РїСѓС‰РµРЅ (СЂРµР¶РёРј РїРѕР»РЅРѕР№ С‚РёС€РёРЅС‹)")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
