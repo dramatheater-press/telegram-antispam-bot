@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.log
+.env
+spam_patterns.json
